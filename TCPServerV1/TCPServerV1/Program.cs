@@ -38,13 +38,15 @@ namespace TCPServerV1
             // running the listener is "host.contoso.com".
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[2];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 6969);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8266);
 
             //Console.WriteLine("Address : " + ipAddress); //debug what address?
 
             // Create a TCP/IP socket.
             Socket listener = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
+
+            //TODO investigate haveing a timeout
 
             // Bind the socket to the local endpoint and listen for incoming connections.
             try
@@ -81,7 +83,7 @@ namespace TCPServerV1
         public static void AcceptCallback(IAsyncResult ar)
         {
             // Signal the main thread to continue.
-            allDone.Set();
+            allDone.Set(); 
 
             // Get the socket that handles the client request.
             Socket listener = (Socket)ar.AsyncState;
@@ -96,7 +98,7 @@ namespace TCPServerV1
 
         public static void ReadCallback(IAsyncResult ar)
         {
-            String content = String.Empty;
+            string content = string.Empty;
 
             // Retrieve the state object and the handler socket
             // from the asynchronous state object.
@@ -112,17 +114,19 @@ namespace TCPServerV1
                 state.sb.Append(Encoding.ASCII.GetString(
                     state.buffer, 0, bytesRead));
 
-                // Check for end-of-file tag. If it is not there, read 
+                // Check for end-of-message tag. If it is not there, read 
                 // more data.
                 content = state.sb.ToString();
-                if (content.IndexOf("<EOF>") > -1)
+                if (content.IndexOf("<EOM>") > -1)
                 {
                     // All the data has been read from the 
                     // client. Display it on the console.
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
-                    // Echo the data back to the client.
-                    Send(handler, content);
+
+                    // Send data back to the client.
+                    string debugString = "Test Message!\0"; //debug
+                    Send(handler, debugString);
                 }
                 else
                 {
