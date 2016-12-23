@@ -36,8 +36,7 @@ namespace TCPServerV1
         }
         static public void StoreControllerData(DataClasses.ControllerData controllerdata)
         {
-            
-            return;
+            DatabaseCalls.AddNewControllerDataToDatabase(controllerdata);
         }
         static public string CreateReplyMessage(DataClasses.ControllerData controllerdata)
         {

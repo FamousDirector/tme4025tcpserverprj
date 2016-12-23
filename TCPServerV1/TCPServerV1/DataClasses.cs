@@ -1,12 +1,6 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-
-namespace TCPServerV1
+﻿namespace TCPServerV1
 {
-    static class DataClasses
+    static public class DataClasses
     {
         public class ControllerData
         {
