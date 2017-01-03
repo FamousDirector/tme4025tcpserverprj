@@ -40,7 +40,11 @@ namespace TCPServerV1
         }
         static public string CreateReplyMessage(DataClasses.ControllerData controllerdata)
         {
-            string replymessage = "This is a test reply";
+            string replymessage = "";
+
+            DateTime time = DateTime.UtcNow.AddDays(1);
+            long unixtimeinseconds = new DateTimeOffset(time).ToUnixTimeSeconds();
+            replymessage = "<time=" + unixtimeinseconds.ToString() + ">";
 
             return replymessage;
         }
