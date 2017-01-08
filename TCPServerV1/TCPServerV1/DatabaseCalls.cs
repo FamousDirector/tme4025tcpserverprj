@@ -5,7 +5,7 @@ namespace TCPServerV1
 {
     public class DatabaseCalls
     {
-        public static void AddNewControllerDataToDatabase(DataClasses.ControllerData controllerdata)
+        internal static void AddNewControllerDataToDatabase(DataClasses.ControllerData controllerdata)
         {
             using (SqlConnection myConnection = getDatabaseConnection())
             {
@@ -55,6 +55,119 @@ namespace TCPServerV1
             {
                 throw new Exception("Could not connect to the database: " + ex.Message);
             }
+        }
+
+        internal static string GetNewRelayState(string UID)
+        {
+            string newstate = "";
+
+            //get new state From DB 
+            //if exists: get state that has most recent date and remove row all rows for that UID 
+            //else return empty
+
+            using (SqlConnection myConnection = getDatabaseConnection())
+            {
+                using (SqlCommand myCommand = new SqlCommand())
+                {
+                    string cmdString = "TODO Needs to be a stored procedure";
+                    myCommand.Connection = myConnection;
+                    myCommand.CommandText = cmdString;
+                    myCommand.Parameters.AddWithValue("@uid", UID);
+
+                    try
+                    {
+                        using (SqlDataReader myReader = myCommand.ExecuteReader())
+                        {
+                            newstate = myReader["NewState"].ToString();
+                        }
+                    }
+                    catch (SqlException error)
+                    {
+                        Console.WriteLine("Error occured when getting new relay state from the DB: " + error.Message);
+                    }
+                }
+            }
+            return newstate;            
+        }
+
+        internal static DateTime GetNextRelayOnTime(string UID)
+        {
+            int ontime = getRelayOnTime(UID);
+            DateTime nextontime = DateTime.UtcNow.Date.AddSeconds(ontime);
+
+            return nextontime;
+        }
+
+        internal static DateTime GetNextRelayOffTime(string UID)
+        {
+            int offtime = getRelayOffTime(UID);
+            DateTime nextofftime = DateTime.UtcNow.Date.AddSeconds(offtime);
+
+            return nextofftime;
+        }
+
+        private static int getRelayOnTime(string UID)
+        {
+            int ontime = -999999999;
+            using (SqlConnection myConnection = getDatabaseConnection())
+            {
+                using (SqlCommand myCommand = new SqlCommand())
+                {
+                    string cmdString = "SELECT ScheduledOnTimeSeconds FROM DeviceSchedules WHERE UID = @uid";
+                    myCommand.Connection = myConnection;
+                    myCommand.CommandText = cmdString;
+                    myCommand.Parameters.AddWithValue("@uid", UID);
+
+                    using (SqlDataReader myReader = myCommand.ExecuteReader())
+                    {
+                        try
+                        {
+                            if (myReader.Read())
+                            {
+                                ontime = int.Parse(myReader["ScheduledOnTimeSeconds"].ToString());
+                            }
+                        }
+
+                        catch (SqlException error)
+                        {
+                            Console.WriteLine("Error occured when getting Scheduled On Time from the DB: " + error.Message);
+                        }
+                    }
+
+                }
+            }
+            return ontime;
+        }
+
+        private static int getRelayOffTime(string UID)
+        {
+            int offtime = -999999999;
+            using (SqlConnection myConnection = getDatabaseConnection())
+            {
+                using (SqlCommand myCommand = new SqlCommand())
+                {
+                    string cmdString = "SELECT ScheduledOffTimeSeconds FROM DeviceSchedules WHERE UID = @uid";
+                    myCommand.Connection = myConnection;
+                    myCommand.CommandText = cmdString;
+                    myCommand.Parameters.AddWithValue("@uid", UID);
+
+                    try
+                    {
+                        using (SqlDataReader myReader = myCommand.ExecuteReader())
+                        {
+                            if (myReader.Read())
+                            {
+                                offtime = int.Parse(myReader["ScheduledOffTimeSeconds"].ToString());
+                            }
+                        }
+                    }
+                    catch (SqlException error)
+                    {
+                        Console.WriteLine("Error occured when getting Scheduled Off Time from the DB: " + error.Message);
+                    }
+                }
+            }
+            return offtime;
         }
     }
 }

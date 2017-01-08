@@ -42,9 +42,17 @@ namespace TCPServerV1
         {
             string replymessage = "";
 
-            DateTime time = DateTime.UtcNow.AddDays(1);
-            long unixtimeinseconds = new DateTimeOffset(time).ToUnixTimeSeconds();
-            replymessage = "<time=" + unixtimeinseconds.ToString() + ">";
+            DateTime ontime = DatabaseCalls.GetNextRelayOnTime(controllerdata.UID);
+            long ontime_unix = new DateTimeOffset(ontime).ToUnixTimeSeconds();
+            replymessage += "<TimeOn=" + ontime_unix.ToString() + ">";
+
+            DateTime offtime = DatabaseCalls.GetNextRelayOffTime(controllerdata.UID);
+            long offtime_unix = new DateTimeOffset(offtime).ToUnixTimeSeconds();
+            replymessage += "<TimeOff=" + offtime_unix.ToString() + ">";
+
+            //TODO get stored procedure implemented
+            //string newstate = DatabaseCalls.GetNewRelayState(controllerdata.UID);
+            //replymessage += "<RelayState="+ newstate + ">";
 
             return replymessage;
         }
