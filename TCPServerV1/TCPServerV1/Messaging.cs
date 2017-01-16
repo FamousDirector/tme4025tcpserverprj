@@ -49,10 +49,9 @@ namespace TCPServerV1
             DateTime offtime = DatabaseCalls.GetNextRelayOffTime(controllerdata.UID);
             long offtime_unix = new DateTimeOffset(offtime).ToUnixTimeSeconds();
             replymessage += "<TimeOff=" + offtime_unix.ToString() + ">";
-
-            //TODO get stored procedure implemented
-            //string newstate = DatabaseCalls.GetNewRelayState(controllerdata.UID);
-            //replymessage += "<RelayState="+ newstate + ">";
+            
+            string newstate = DatabaseCalls.GetNewRelayState(controllerdata.UID);
+            replymessage += "<RelayState="+ newstate + ">";
 
             return replymessage;
         }

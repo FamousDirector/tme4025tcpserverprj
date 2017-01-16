@@ -11,7 +11,7 @@ namespace TCPServerV1
             {
                 using (SqlCommand myCommand = new SqlCommand())
                 {
-                    string cmdString = "INSERT INTO ControllerDataTable" +
+                    string cmdString = "INSERT INTO ControllerDataTable " +
                         "(UID,RelayState,Temperature,Power) VALUES (@uid, @relaystate, @temperature, @power)";
                     myCommand.Connection = myConnection;
                     myCommand.CommandText = cmdString;
@@ -69,17 +69,39 @@ namespace TCPServerV1
             {
                 using (SqlCommand myCommand = new SqlCommand())
                 {
-                    string cmdString = "TODO Needs to be a stored procedure";
+                    string cmdString = "SELECT NewState FROM NewRelayState WHERE UID = @uid";
                     myCommand.Connection = myConnection;
                     myCommand.CommandText = cmdString;
                     myCommand.Parameters.AddWithValue("@uid", UID);
 
                     try
                     {
-                        using (SqlDataReader myReader = myCommand.ExecuteReader())
+                        int value = (int)myCommand.ExecuteScalar();
+                        if (value == 0)
                         {
-                            newstate = myReader["NewState"].ToString();
+                            newstate = "OFF";
                         }
+                        else
+                        {
+                            newstate = "ON";
+                        }                     
+                    }
+                    catch (SqlException error)
+                    {
+                        Console.WriteLine("Error occured when getting new relay state from the DB: " + error.Message);
+                    }
+                }
+
+                using (SqlCommand myCommand = new SqlCommand())
+                {
+                    string cmdString = "DELETE FROM NewRelayState WHERE UID = @uid";
+                    myCommand.Connection = myConnection;
+                    myCommand.CommandText = cmdString;
+                    myCommand.Parameters.AddWithValue("@uid", UID);
+
+                    try
+                    {
+                        myCommand.ExecuteNonQuery();
                     }
                     catch (SqlException error)
                     {
