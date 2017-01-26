@@ -76,15 +76,21 @@ namespace TCPServerV1
 
                     try
                     {
-                        int value = (int)myCommand.ExecuteScalar();
-                        if (value == 0)
+                        object obj = myCommand.ExecuteScalar();
+                        int id = -1;
+                        if (DBNull.Value == obj) //ensure something was returned
                         {
-                            newstate = "OFF";
-                        }
-                        else
-                        {
-                            newstate = "ON";
-                        }                     
+                            int value = (int)obj;
+
+                            if (value == 0)
+                            {
+                                newstate = "OFF";
+                            }
+                            else
+                            {
+                                newstate = "ON";
+                            }
+                        }                    
                     }
                     catch (SqlException error)
                     {
