@@ -51,7 +51,10 @@ namespace TCPServerV1
             replymessage += "<TimeOff=" + offtime_unix.ToString() + ">";
             
             string newstate = DatabaseCalls.GetNewRelayState(controllerdata.UID);
-            replymessage += "<RelayState="+ newstate + ">";
+            if (newstate != "") //ensure content
+            {
+                replymessage += "<RelayState=" + newstate + ">";
+            }
 
             return replymessage;
         }
