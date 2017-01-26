@@ -136,6 +136,8 @@ namespace TCPServerV1
                         //Create Reply Message to send back to client
                         string replymessage = Messaging.CreateReplyMessage(newcontrollerdata);
 
+                        Console.WriteLine("Returned: " + replymessage);
+
                         Send(handler, replymessage);
                     }
                     else
