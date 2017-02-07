@@ -13,24 +13,31 @@ namespace TCPServerV1
             //ex data : <UID = JAMESESP8266>< Relay = 0 >< Temperature = 85 >< Power = 88 >< EOM >
             DataClasses.ControllerData newcontrollerdata = new DataClasses.ControllerData();
 
-            char[] delimiterChars = { '<', '>',};
-            string[] rawdatastrings = message.Split(delimiterChars);
+            try
+            { 
+                char[] delimiterChars = { '<', '>',};
+                string[] rawdatastrings = message.Split(delimiterChars);
 
-            //Set UID
-            string rawuid = Array.FindLast(rawdatastrings, s => s.StartsWith("UID"));
-            newcontrollerdata.UID = rawuid.Remove(0, rawuid.LastIndexOf('=') + 1);
+                //Set UID
+                string rawuid = Array.FindLast(rawdatastrings, s => s.StartsWith("UID"));
+                newcontrollerdata.UID = rawuid.Remove(0, rawuid.LastIndexOf('=') + 1);
 
-            //Set RelayState
-            string rawrelaystate = Array.FindLast(rawdatastrings, s => s.StartsWith("Relay"));
-            newcontrollerdata.RelayState = int.Parse(rawrelaystate.Remove(0, rawrelaystate.LastIndexOf('=') + 1));
+                //Set RelayState
+                string rawrelaystate = Array.FindLast(rawdatastrings, s => s.StartsWith("Relay"));
+                newcontrollerdata.RelayState = int.Parse(rawrelaystate.Remove(0, rawrelaystate.LastIndexOf('=') + 1));
 
-            //Set Temperature
-            string rawtemperature = Array.FindLast(rawdatastrings, s => s.StartsWith("Temperature"));
-            newcontrollerdata.Temperature = int.Parse(rawtemperature.Remove(0, rawtemperature.LastIndexOf('=') + 1));
+                //Set Temperature
+                string rawtemperature = Array.FindLast(rawdatastrings, s => s.StartsWith("Temperature"));
+                newcontrollerdata.Temperature = int.Parse(rawtemperature.Remove(0, rawtemperature.LastIndexOf('=') + 1));
 
-            //Set Power Usage
-            string rawpower = Array.FindLast(rawdatastrings, s => s.StartsWith("Power"));
-            newcontrollerdata.Power = int.Parse(rawpower.Remove(0, rawpower.LastIndexOf('=') + 1));
+                //Set Power Usage
+                string rawpower = Array.FindLast(rawdatastrings, s => s.StartsWith("Power"));
+                newcontrollerdata.Power = int.Parse(rawpower.Remove(0, rawpower.LastIndexOf('=') + 1));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
 
             return newcontrollerdata;
         }
