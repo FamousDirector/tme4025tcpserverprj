@@ -40,7 +40,7 @@ namespace TCPServerV1
                 // The DNS name of the computer
                 // running the listener is "host.contoso.com".
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList[2];
+                IPAddress ipAddress = IPAddress.Any; //0.0.0.0
                 IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8266);
 
                 //Console.WriteLine("Address : " + ipAddress); //debug what address?
@@ -108,44 +108,53 @@ namespace TCPServerV1
                 StateObject state = (StateObject)ar.AsyncState;
                 Socket handler = state.workSocket;
 
-                // Read data from the client socket. 
-                int bytesRead = handler.EndReceive(ar);
-
-                if (bytesRead > 0)
+                try
                 {
-                    // There  might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(
-                        state.buffer, 0, bytesRead));
 
-                    // Check for end-of-message tag. If it is not there, read 
-                    // more data.
-                    content = state.sb.ToString();
-                    if (content.IndexOf("<EOM>") > -1)
+                    // Read data from the client socket. 
+                    int bytesRead = handler.EndReceive(ar);
+
+                    if (bytesRead > 0)
                     {
-                        // All the data has been read from the 
-                        // client. Display it on the console.
-                        Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                            content.Length, content);
+                        // There  might be more data, so store the data received so far.
+                        state.sb.Append(Encoding.ASCII.GetString(
+                            state.buffer, 0, bytesRead));
 
-                        //Parse Message Data
-                        DataClasses.ControllerData newcontrollerdata = Messaging.ParseMessageData(content);
+                        // Check for end-of-message tag. If it is not there, read 
+                        // more data.
+                        content = state.sb.ToString();
+                        if (content.IndexOf("<EOM>") > -1)
+                        {
+                            // All the data has been read from the 
+                            // client. Display it on the console.
+                            Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
+                                content.Length, content);
 
-                        //Store Message Data
-                        Messaging.StoreControllerData(newcontrollerdata);
+                            //Parse Message Data
+                            DataClasses.ControllerData newcontrollerdata = Messaging.ParseMessageData(content);
 
-                        //Create Reply Message to send back to client
-                        string replymessage = Messaging.CreateReplyMessage(newcontrollerdata);
+                            //Store Message Data
+                            Messaging.StoreControllerData(newcontrollerdata);
 
-                        Console.WriteLine("Returned: " + replymessage);
+                            //Create Reply Message to send back to client
+                            string replymessage = Messaging.CreateReplyMessage(newcontrollerdata);
 
-                        Send(handler, replymessage);
+                            Console.WriteLine("Returned: " + replymessage);
+
+                            Send(handler, replymessage);
+                        }
+                        else
+                        {
+                            // Not all data received. Get more.
+                            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                            new AsyncCallback(ReadCallback), state);
+                        }
                     }
-                    else
-                    {
-                        // Not all data received. Get more.
-                        handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                        new AsyncCallback(ReadCallback), state);
-                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    Send(handler, "Nope");
                 }
             }
 
