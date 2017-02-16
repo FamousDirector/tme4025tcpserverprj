@@ -62,6 +62,10 @@ namespace TCPServerV1
             {
                 replymessage += "<RelayState=" + newstate + ">";
             }
+            else
+            {
+                Console.WriteLine("No New State");
+            }
 
             return replymessage;
         }

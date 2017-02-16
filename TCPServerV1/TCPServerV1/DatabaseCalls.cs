@@ -75,32 +75,32 @@ namespace TCPServerV1
             {
                 using (SqlCommand myCommand = new SqlCommand())
                 {
-                    string cmdString = "SELECT NewState FROM NewRelayState WHERE UID = @uid";
+                    string cmdString = "SELECT * FROM NewRelayState WHERE UID = @uid";
                     myCommand.Connection = myConnection;
                     myCommand.CommandText = cmdString;
                     myCommand.Parameters.AddWithValue("@uid", UID);
-
-                    try
+                    using (SqlDataReader myReader = myCommand.ExecuteReader())
                     {
-                        object obj = myCommand.ExecuteScalar();
-                        int id = -1;
-                        if (DBNull.Value == obj) //ensure something was returned
+                        try
                         {
-                            int value = (int)obj;
+                            if (myReader.Read())
+                            {
+                                int value = int.Parse(myReader["NewState"].ToString());
+                                if (value == 0)
+                                {
+                                    newstate = "OFF";
+                                }
+                                else
+                                {
+                                    newstate = "ON";
+                                }
+                            }
+                        }
 
-                            if (value == 0)
-                            {
-                                newstate = "OFF";
-                            }
-                            else
-                            {
-                                newstate = "ON";
-                            }
-                        }                    
-                    }
-                    catch (SqlException error)
-                    {
-                        Console.WriteLine("Error occured when getting new relay state from the DB: " + error.Message);
+                        catch (SqlException error)
+                        {
+                            Console.WriteLine("Error occured when getting new relay state from the DB: " + error.Message);
+                        }
                     }
                 }
 
@@ -117,7 +117,7 @@ namespace TCPServerV1
                     }
                     catch (SqlException error)
                     {
-                        Console.WriteLine("Error occured when getting new relay state from the DB: " + error.Message);
+                        Console.WriteLine("Error occured when removing new relay state from the DB: " + error.Message);
                     }
                 }
             }
